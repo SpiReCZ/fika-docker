@@ -22,7 +22,7 @@ yq -e '.' "$temp_dir"/config_replace.yaml | jq -c '.[]' | while read -r item; do
       # Extract the key part of the replacement to check for existence
       key=$(echo "$replacement" | cut -d'=' -f1 | xargs)
 
-      # Check if the key exists in the JSON file
+      # Check if the key exists in the JSON file (does not support explicit null value)
       if jq -e "has(\"$key\")" "$file" > /dev/null; then
         # Apply the jq replacement
         jq "$replacement" "$file" > "$temp_dir/tmp.json" && mv "$temp_dir/tmp.json" "$file"
