@@ -7,10 +7,10 @@ cleanup() {
 trap cleanup EXIT
 
 # Convert the multi-line environment variable to a YAML file format
-echo "$CONFIG" > "$temp_dir"/config_replace.yaml
+echo "$CONFIG" > "$temp_dir/config_replace.yaml"
 
 # Iterate over each entry in the YAML array
-yq -e '.' "$temp_dir"/config_replace.yaml | jq -c '.[]' | while read -r item; do
+yq -e '.' "$temp_dir/config_replace.yaml" | jq -c '.[]?' | while read -r item; do
   file=$(echo "$item" | jq -r '.file')
   replacements=$(echo "$item" | jq -r '.replacements')
 
@@ -18,15 +18,21 @@ yq -e '.' "$temp_dir"/config_replace.yaml | jq -c '.[]' | while read -r item; do
   if [ -f "$file" ]; then
     echo "Config injection: $file"
     # Iterate over each replacement for the file
-    echo "$replacements" | yq -r '.[]' - | while read -r replacement; do
+    echo "$replacements" | yq -r '.' | jq -c '.[]?' | while read -r replacement; do
+      # Remove quotes
+      replacement="${replacement:1:-1}"
+      #echo "Replacement: $replacement"
+
       # Extract the key part of the replacement to check for existence
       key=$(echo "$replacement" | cut -d'=' -f1 | xargs)
+      # Replace the escaped newline character with a real newline
+      value=$(echo "$replacement" | cut -d'=' -f2- | sed 's/\\n/\n/g' | xargs)
 
-      # Check if the key exists in the JSON file (does not support explicit null value)
-      if jq -e "has(\"$key\")" "$file" > /dev/null; then
+      # Check if the key exists in the JSON file
+      if jq -e "$key" "$file" > /dev/null; then
         # Apply the jq replacement
-        jq "$replacement" "$file" > "$temp_dir/tmp.json" && mv "$temp_dir/tmp.json" "$file"
-        echo "Replacing: $replacement"
+        jq "$key = $value" "$file" > "$temp_dir/tmp.json" && mv "$temp_dir/tmp.json" "$file"
+        echo "Replacing: $key with $value"
       else
         echo "Error: $key does not exist in $file"
         exit 1
