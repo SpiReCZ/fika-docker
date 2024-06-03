@@ -1,0 +1,124 @@
+version: '3.8'
+services:
+  tarkov-server:
+    image: spirecz/fika-server:2.1.1-3.8.3
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # git tag name
+        SPT: 3.8.3
+        # github release name
+        FIKA: v2.1.1
+    container_name: tarkov-server
+    #volumes:
+      #- ./mods:/opt/mods
+      #- ./bullet.sh:/opt/bullet.sh
+      #- ./config.sh:/opt/config.sh
+      #- ./mods.sh:/opt/mods.sh
+      #- ./server:/opt/server
+      #- fika-server:/opt/server
+      #- /volume1/docker/tarkov-coop/server:/opt/server
+    ports:
+      - "6969:6969"
+      - "6970:6970"
+    #user: 6969:6969
+    environment:
+      TZ: Europe/Prague
+      MODS_INSTALL: |
+        TechHappy-WebMinimap: https://github.com/NNThomasL/SPTarkovWebMinimap/releases/download/v1.0.9/TechHappy-WebMinimap-1-0-9.zip
+        IhanaMies-LootValue: https://github.com/IhanaMies/LootValue/releases/download/2.0.3/IhanaMies-LootValue-203.zip
+        SWAG-Donuts: https://github.com/p-kossa/nookys-swag-presets-spt/releases/download/v3.3.5/SWAG-Donuts-v3.3.5-SPT380.zip
+        SAIN: https://github.com/Solarint/SAIN/releases/download/2.2.1/SAIN-2.2.1-Hotfix.zip
+        DrakiaXYZ-BigBrain: https://github.com/DrakiaXYZ/SPT-BigBrain/releases/download/0.4.0/DrakiaXYZ-BigBrain-0.4.0_3.8.0.7z
+        DrakiaXYZ-Waypoints: https://github.com/DrakiaXYZ/SPT-Waypoints/releases/download/1.4.3/DrakiaXYZ-Waypoints-1.4.3.7z
+        Skwizzy-LootingBots: https://github.com/Skwizzy/SPT-LootingBots/releases/download/v1.3.3-aki-3.8.0-beta/Skwizzy-LootingBots-1.3.3_2.zip
+        DanW-SPTQuestingBots: https://github.com/dwesterwick/SPTQuestingBots/releases/download/0.5.0/DanW-SPTQuestingBots.zip
+        GTFO: https://github.com/dvize/GTFO/releases/download/v1.1.5-fix/dvize.GTFOv1.15fixnull.zip
+        MoreCheckmarks: https://github.com/TommySoucy/MoreCheckmarks/releases/download/v1.5.13/MoreCheckmarks-1.5.13-for-3.8.0-29197.zip
+        Platinum-TheBlacklist: https://dev.sp-tarkov.com/Platinum/the-blacklist/releases/download/v2.0.0/Platinum-TheBlacklist-2.0.0.zip
+        WTT-HeadVoiceSelector: https://github.com/GrooveypenguinX/HeadVoiceSelector/releases/download/1.03/WTT-HeadVoiceSelector.rar
+      CONFIG: |
+        - file: /opt/server/Aki_Data/Server/database/globals.json
+          replacements:
+            #- .config.nonExistingValueCommentTest = "This is a commented replacement"
+            - .config.SavagePlayCooldown = 120
+            - .config.SavagePlayCooldownNdaFree = 120
+            - |
+              .config.RagFair.maxActiveOfferCount = [
+                {
+                  "count": 1,
+                  "from": -10000,
+                  "to": -10
+                },
+                {
+                  "count": 2,
+                  "from": -10,
+                  "to": -2
+                },
+                {
+                  "count": 3,
+                  "from": -2,
+                  "to": 0.2
+                },
+                {
+                  "count": 4,
+                  "from": 0.2,
+                  "to": 7
+                },
+                {
+                  "count": 5,
+                  "from": 7,
+                  "to": 30
+                },
+                {
+                  "count": 6,
+                  "from": 30,
+                  "to": 60
+                },
+                {
+                  "count": 7,
+                  "from": 60,
+                  "to": 150
+                },
+                {
+                  "count": 8,
+                  "from": 150,
+                  "to": 200
+                },
+                {
+                  "count": 9,
+                  "from": 200,
+                  "to": 250
+                },
+                {
+                  "count": 10,
+                  "from": 250,
+                  "to": 500
+                },
+                {
+                  "count": 11,
+                  "from": 500,
+                  "to": 750
+                },
+                {
+                  "count": 12,
+                  "from": 750,
+                  "to": 1000
+                },
+                {
+                  "count": 15,
+                  "from": 1000,
+                  "to": 10000
+                }
+              ]
+        - file: /opt/server/user/mods/fika-server/assets/configs/fika.jsonc
+          replacements:
+            - .client.friendlyFire = false
+            - .server.giftedItemsLoseFIR = false
+    #restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: "false"
+
+#volumes:
+#  fika-server:
